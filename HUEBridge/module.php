@@ -293,7 +293,7 @@ class HUEBridge extends IPSModule
         $sensors = $this->Request('/sensors');
         if ($sensors) {
             foreach ($sensors as $sensorId => $sensor) {
-                if ($sensor->type == 'ZLLPresence' || $sensor->type == 'ZLLLightLevel' || $sensor->type == 'ZLLTemperature') {
+                if ($sensor->type == 'ZHAFire' || $sensor->type == 'ZLLLightLevel' || $sensor->type == 'ZLLTemperature') {
                     // only support ZLLPresence sensor, also read data from ZLLLightLevel and ZLLTemperature sensors
                     $uniqueId = (string)$sensor->uniqueid;
                     // only use first 26 characters as uniqueid

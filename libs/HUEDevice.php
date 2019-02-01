@@ -207,7 +207,7 @@ abstract class HUEDevice extends IPSModule
             $this->MaintainVariable("ALARM", $this->Translate('Alarm'), 0, "~Alert", 1, true);
             $alarmId = $this->GetIDForIdent("ALARM");
 
-            $this->MaintainVariable("BATTERY", $this->Translate('Battery'), 1, "~Battery.100", 4, true);
+            $this->MaintainVariable("BATTERY", $this->Translate('Battery'), 0, "~Battery", 4, true);
             $batteryId = $this->GetIDForIdent("BATTERY");
         }
 
@@ -265,9 +265,9 @@ abstract class HUEDevice extends IPSModule
         } elseif (get_class($this) == 'HUESensor') {
             if (@$presenceId && isset($values_state['presence'])) {
                 $this->SetValueBoolean($presenceId, $values_state['presence']);
-                if (@$batteryId) {
-                    $this->SetValueInteger($batteryId, $values['battery']);
-                } // only update battery from presence
+            }
+            if (@$batteryId) && isset($values_state['lowbattery'])) {{
+                $this->SetValueBoolean($batteryId, $values['lowbattery']);
             }
             if (@$illuminationId && isset($values_state['lightlevel'])) {
                 $this->SetValueFloat($illuminationId, $values_state['lightlevel']);
@@ -277,9 +277,6 @@ abstract class HUEDevice extends IPSModule
             }
             if (@$alarmId && isset($values_state['fire'])) {
                 $this->SetValueBoolean($alarmId, $values_state['fire']);
-                if (@$batteryId) {
-                    $this->SetValueInteger($batteryId, $values['battery']);
-                } // only update battery from alarm
             }
         }
     }

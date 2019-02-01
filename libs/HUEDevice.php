@@ -590,3 +590,4 @@ abstract class HUEDevice extends IPSModule
     }
 
 }
+

@@ -207,7 +207,7 @@ abstract class HUEDevice extends IPSModule
             $this->MaintainVariable("ALARM", $this->Translate('Alarm'), 0, "~Alert", 1, true);
             $alarmId = $this->GetIDForIdent("ALARM");
 
-            $this->MaintainVariable("BATTERY", $this->Translate('Battery'), 0, "~Battery", 4, true);
+            $this->MaintainVariable("BATTERY", $this->Translate('Battery'), 1, "~Battery.100", 4, true);
             $batteryId = $this->GetIDForIdent("BATTERY");
         }
 
@@ -265,9 +265,9 @@ abstract class HUEDevice extends IPSModule
         } elseif (get_class($this) == 'HUESensor') {
             if (@$presenceId && isset($values_state['presence'])) {
                 $this->SetValueBoolean($presenceId, $values_state['presence']);
-            }
-            if (@$batteryId) && isset($values_state['lowbattery'])) {{
-                $this->SetValueBoolean($batteryId, $values['lowbattery']);
+                if (@$batteryId) {
+                    $this->SetValueInteger($batteryId, $values['battery']);
+                } // only update battery from presence
             }
             if (@$illuminationId && isset($values_state['lightlevel'])) {
                 $this->SetValueFloat($illuminationId, $values_state['lightlevel']);
@@ -277,6 +277,9 @@ abstract class HUEDevice extends IPSModule
             }
             if (@$alarmId && isset($values_state['fire'])) {
                 $this->SetValueBoolean($alarmId, $values_state['fire']);
+                if (@$batteryId) {
+                    $this->SetValueInteger($batteryId, $values['battery']);
+                } // only update battery from alarm
             }
         }
     }
@@ -301,20 +304,20 @@ abstract class HUEDevice extends IPSModule
     public function RequestAction($key, $value)
     {
         switch ($key) {
-        case 'STATE':
-        case 'ALARM':
-        case 'PRESENCE':
-            $value = $value == 1;
-            break;
-        case 'HUE':
-        case 'COLOR_TEMPERATURE':
-        case 'SATURATION':
-        case 'BRIGHTNESS':
-        case 'TEMPERATURE':
-        case 'ILLUMINATION':
-        case 'BATTERY':
-            $value = $value;
-            break;
+            case 'STATE':
+            case 'ALARM':
+            case 'PRESENCE':
+                $value = $value == 1;
+                break;
+            case 'HUE':
+            case 'COLOR_TEMPERATURE':
+            case 'SATURATION':
+            case 'BRIGHTNESS':
+            case 'TEMPERATURE':
+            case 'ILLUMINATION':
+            case 'BATTERY':
+                $value = $value;
+                break;
         }
         $this->SetValue($key, $value);
     }
@@ -326,9 +329,9 @@ abstract class HUEDevice extends IPSModule
     public function GetValue($key)
     {
         switch ($key) {
-        default:
-            $value = GetValue(@IPS_GetObjectIDByIdent($key, $this->InstanceID));
-            break;
+            default:
+                $value = GetValue(@IPS_GetObjectIDByIdent($key, $this->InstanceID));
+                break;
         }
         return $value;
     }
@@ -427,87 +430,87 @@ abstract class HUEDevice extends IPSModule
 
         foreach ($list as $key => $value) {
             switch ($key) {
-            case 'STATE':
-                $stateNewValue = $value;
-                break;
-            case 'EFFECT':
-                $effect = $value;
-                break;
-            case 'TRANSITIONTIME':
-                $transitiontime = $value;
-                break;
-            case 'ALERT':
-                $alert = $value;
-                break;
-            case 'HUE':
-                $stateNewValue = true;
-                $hueNewValue = $value;
-                $newHex = HUEMisc::HSV2HEX($hueNewValue, $satValue, $briValue);
-                if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($newHex));
-                }
-                break;
-            case 'COLOR':
-                $stateNewValue = true;
-                $colorNewValue = $value;
-                $hex = str_pad(dechex($value), 6, 0, STR_PAD_LEFT);
-                $hsv = HUEMisc::HEX2HSV($hex);
-                if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($value));
-                }
-                $hueNewValue = $hsv['h'];
-                $briNewValue = $hsv['v'];
-                $satNewValue = $hsv['s'];
-                $cmNewValue = 0;
-                break;
-            case 'BRIGHTNESS':
-                $briNewValue = $value;
-                if (IPS_GetProperty($this->InstanceID, 'LightFeatures') != 3) {
-                    if ($cmValue == '0') {
-                        $newHex = HUEMisc::HSV2HEX($hueValue, $satValue, $briNewValue);
-                        if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($newHex));
+                case 'STATE':
+                    $stateNewValue = $value;
+                    break;
+                case 'EFFECT':
+                    $effect = $value;
+                    break;
+                case 'TRANSITIONTIME':
+                    $transitiontime = $value;
+                    break;
+                case 'ALERT':
+                    $alert = $value;
+                    break;
+                case 'HUE':
+                    $stateNewValue = true;
+                    $hueNewValue = $value;
+                    $newHex = HUEMisc::HSV2HEX($hueNewValue, $satValue, $briValue);
+                    if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($newHex));
+                    }
+                    break;
+                case 'COLOR':
+                    $stateNewValue = true;
+                    $colorNewValue = $value;
+                    $hex = str_pad(dechex($value), 6, 0, STR_PAD_LEFT);
+                    $hsv = HUEMisc::HEX2HSV($hex);
+                    if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($value));
+                    }
+                    $hueNewValue = $hsv['h'];
+                    $briNewValue = $hsv['v'];
+                    $satNewValue = $hsv['s'];
+                    $cmNewValue = 0;
+                    break;
+                case 'BRIGHTNESS':
+                    $briNewValue = $value;
+                    if (IPS_GetProperty($this->InstanceID, 'LightFeatures') != 3) {
+                        if ($cmValue == '0') {
+                            $newHex = HUEMisc::HSV2HEX($hueValue, $satValue, $briNewValue);
+                            if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($newHex));
+                            }
+                            $hueNewValue = $hueValue;
+                            $satNewValue = $satValue;
+                        } else {
+                            $ctNewValue = $ctValue;
                         }
+                    }
+                    $stateNewValue = ($briNewValue > 0);
+                    break;
+                case 'SATURATION':
+                    $stateNewValue = true;
+                    $cmNewValue = 0;
+                    $satNewValue = $value;
+                    $newHex = HUEMisc::HSV2HEX($hueValue, $satNewValue, $briValue);
+                    if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($newHex));
+                    }
+                    $hueNewValue = $hueValue;
+                    $briNewValue = $briValue;
+                    break;
+                case 'COLOR_TEMPERATURE':
+                    $stateNewValue = true;
+                    $cmNewValue = 1;
+                    $ctNewValue = $value;
+                    $briNewValue = $briValue;
+                    break;
+                case 'COLOR_MODE':
+                    $stateNewValue = true;
+                    $cmNewValue = $value;
+                    if ($cmNewValue == 1) {
+                        $ctNewValue = $ctValue;
+                        IPS_SetHidden($colorId, true);
+                        IPS_SetHidden($ctId, false);
+                        IPS_SetHidden($satId, true);
+                    } else {
                         $hueNewValue = $hueValue;
                         $satNewValue = $satValue;
-                    } else {
-                        $ctNewValue = $ctValue;
+                        $briNewValue = $briValue;
+                        $newHex = HUEMisc::HSV2HEX($hueValue, $satValue, $briValue);
+                        $this->SetValueInteger($colorId, hexdec($newHex));
+                        IPS_SetHidden($colorId, false);
+                        IPS_SetHidden($ctId, true);
+                        IPS_SetHidden($satId, false);
                     }
-                }
-                $stateNewValue = ($briNewValue > 0);
-                break;
-            case 'SATURATION':
-                $stateNewValue = true;
-                $cmNewValue = 0;
-                $satNewValue = $value;
-                $newHex = HUEMisc::HSV2HEX($hueValue, $satNewValue, $briValue);
-                if (isset($colorId)) { $this->SetValueInteger($colorId, hexdec($newHex));
-                }
-                $hueNewValue = $hueValue;
-                $briNewValue = $briValue;
-                break;
-            case 'COLOR_TEMPERATURE':
-                $stateNewValue = true;
-                $cmNewValue = 1;
-                $ctNewValue = $value;
-                $briNewValue = $briValue;
-                break;
-            case 'COLOR_MODE':
-                $stateNewValue = true;
-                $cmNewValue = $value;
-                if ($cmNewValue == 1) {
-                    $ctNewValue = $ctValue;
-                    IPS_SetHidden($colorId, true);
-                    IPS_SetHidden($ctId, false);
-                    IPS_SetHidden($satId, true);
-                } else {
-                    $hueNewValue = $hueValue;
-                    $satNewValue = $satValue;
-                    $briNewValue = $briValue;
-                    $newHex = HUEMisc::HSV2HEX($hueValue, $satValue, $briValue);
-                    $this->SetValueInteger($colorId, hexdec($newHex));
-                    IPS_SetHidden($colorId, false);
-                    IPS_SetHidden($ctId, true);
-                    IPS_SetHidden($satId, false);
-                }
-                break;
+                    break;
             }
         }
 
@@ -587,4 +590,3 @@ abstract class HUEDevice extends IPSModule
     }
 
 }
-

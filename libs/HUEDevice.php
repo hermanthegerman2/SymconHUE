@@ -278,7 +278,7 @@ abstract class HUEDevice extends IPSModule
             if (@$alarmId && isset($values_state['fire'])) {
                 $this->SetValueBoolean($alarmId, $values_state['fire']);
                 if (@$batteryId) {
-                    $this->SetValueInteger($batteryId, $values_state['lowbattery']);
+                    $this->SetValueBoolean($batteryId, $values_state['lowbattery']);
                 } // only update battery from alarm
             }
         }

@@ -109,15 +109,15 @@ abstract class HUEDevice extends IPSModule
             $type = utf8_decode((string)$data['type']);
             $modelid = utf8_decode((string)$data['modelid']);
             // We will receive three types of sensors, but only ZLLPresence will contains the correct name, model and type
-            if (IPS_GetName($this->InstanceID) != $name && $type == "ZLLPresence") {
+            if (IPS_GetName($this->InstanceID) != $name) {
                 IPS_SetName($this->InstanceID, $name);
                 $dirty = true;
             }
-            if (IPS_GetProperty($this->InstanceID, 'ModelId') != $modelid && $type == "ZLLPresence") {
+            if (IPS_GetProperty($this->InstanceID, 'ModelId') != $modelid) {
                 IPS_SetProperty($this->InstanceID, 'ModelId', $modelid);
                 $dirty = true;
             }
-            if (IPS_GetProperty($this->InstanceID, 'Type') != $type && $type == "ZLLPresence") {
+            if (IPS_GetProperty($this->InstanceID, 'Type') != $type) {
                 IPS_SetProperty($this->InstanceID, 'Type', $type);
                 $dirty = true;
             }

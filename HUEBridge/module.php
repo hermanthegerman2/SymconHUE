@@ -226,8 +226,8 @@ class HUEBridge extends IPSModule
             $sensors = $this->Request('/sensors');
             if ($sensors) {
                 foreach ($sensors as $sensorId => $sensor) {
-                    if ($sensor->type == "ZHAFire") {
-                        // only support ZLLPresence sensor
+                    if ($sensor->type == 'ZHAFire' || $sensor->type == 'ZLLPresence' || $sensor->type == 'ZLLLightLevel' || $sensor->type == 'ZLLTemperature') {
+                        // only support sensors below
                         $name = utf8_decode((string)$sensor->name);
                         $uniqueId = (string)$sensor->uniqueid;
                         // only use first 26 characters as uniqueid
@@ -293,8 +293,8 @@ class HUEBridge extends IPSModule
         $sensors = $this->Request('/sensors');
         if ($sensors) {
             foreach ($sensors as $sensorId => $sensor) {
-                if ($sensor->type == 'ZHAFire' || $sensor->type == 'ZLLLightLevel' || $sensor->type == 'ZLLTemperature') {
-                    // only support ZLLPresence sensor, also read data from ZLLLightLevel and ZLLTemperature sensors
+                if ($sensor->type == 'ZHAFire' || $sensor->type == 'ZLLPresence' || $sensor->type == 'ZLLLightLevel' || $sensor->type == 'ZLLTemperature') {
+                    // only support sensors below
                     $uniqueId = (string)$sensor->uniqueid;
                     // only use first 26 characters as uniqueid
                     $uniqueId = substr($uniqueId, 0, 26);

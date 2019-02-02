@@ -207,7 +207,7 @@ abstract class HUEDevice extends IPSModule
             $this->MaintainVariable("ALARM", $this->Translate('Alarm'), 0, "~Alert", 1, true);
             $alarmId = $this->GetIDForIdent("ALARM");
 
-            $this->MaintainVariable("BATTERY", $this->Translate('Battery'), 1, "~Battery.100", 4, true);
+            $this->MaintainVariable("BATTERY", $this->Translate('Battery'), 0, "~Battery", 1, true);
             $batteryId = $this->GetIDForIdent("BATTERY");
         }
 
@@ -278,7 +278,7 @@ abstract class HUEDevice extends IPSModule
             if (@$alarmId && isset($values_state['fire'])) {
                 $this->SetValueBoolean($alarmId, $values_state['fire']);
                 if (@$batteryId) {
-                    $this->SetValueInteger($batteryId, $values['battery']);
+                    $this->SetValueInteger($batteryId, $values_state['lowbattery']);
                 } // only update battery from alarm
             }
         }
